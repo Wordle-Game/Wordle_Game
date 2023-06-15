@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Game</title>
+</head>
+
+<body>
+    <style>
+        input {
+            width: 50px;
+            height: 50px;
+            font-size: 40px;
+            text-align: center;
+        }
+
+        #HiddenButton {
+            position: relative;
+            top: 160px;
+        }
+
+        #ResetButton {
+            position: fixed;
+            top: 10px;
+            right: 0px;
+        }
+    </style>
+
+    <div id='my_div'>
+        <center>
+            <br><br><br>
+            <h1> Wordle Game <br> Select</h1> <br><br><br>
+            <button id="RandM" style="padding: 70px 98px; font-size: 2.5em; margin-right: 5px">랜덤 모드</button>
+            <button id="UserM" style="padding: 70px 30px; font-size: 2.5em; margin-left: 5px">사용자 지정 모드</button>
+        </center>
+    </div>
+
+    <div id='HiddenButton'>
+        <center>
+            <button id="AnsB"> 정답 설정 </button>
+            <button id="SubB"> 제출 </button>
+        </center>
+    </div>
+
+    <div id='ResetButton'>
+        <button id="ResB"> 모드 선택 </button>
+    </div>
+    <div id="gameCount">
+        <span id="Count"></span>
+    </div>
+
+
+    <script>
+        const $RandButton = document.querySelector('#RandM');
+        const $UserButton = document.querySelector('#UserM');
+        const AnsB = document.getElementById('AnsB');
+        const SubB = document.getElementById('SubB');
+        const ResB = document.getElementById('ResB');
+        const $AnswerButton = document.querySelector('#AnsB');
+        const $SubmitButton = document.querySelector('#SubB');
+        const $ResetButton = document.querySelector('#ResB');
+        const $Count = document.querySelector('#Count');
+
+        let tryCount = 0;
+
+
+
+        $ResetButton.addEventListener('click',
+            Reset => {
+                location.reload();
+            })
+
+        AnsB.style.display = 'none'; 
+        SubB.style.display = 'none'; 
+        ResB.style.display = 'none'; 
+                $Count.style.display = 'none';
+
+        function deleteDiv() { 
+            const div = document.getElementById('my_div');
+            div.remove();
+        }
+
+        function CreateWordle() { 
+            var template1 = ` <center> 
+    <h1> Wordle Game <br> Play</h1> <br><br><br>
+    <div>
+    <input class="input">
+    <input class="input">
+    <input class="input">
+    <input class="input">
+    <input class="input">
+    </div> </center>`;
+            document.querySelector('body').insertAdjacentHTML('beforeend', template1);
+        }
+
+      
+
+
+
+        $RandButton.addEventListener('click',
+            correct => {
+                deleteDiv(); 
+                CreateWordle(); 
+                ResB.style.display = 'block'; 
+                SubB.style.display = 'block'; 
+               
+                console.log("랜덤 모드 선택!");
+
+                var RandAnswer = ['apple', 'adult', 'beast', 'break', 'cross',
+                    'eight', 'focus', 'giant', 'hobby', 'hyena', 'manor', 'model', 'puppy'];
+                const random = Math.floor(Math.random() * RandAnswer.length);
+                console.log(RandAnswer[random]);
+
+                var CorrectAnswer = RandAnswer[random];
+                $SubmitButton.addEventListener('click',
+                    correct => {
+                        var input = document.querySelectorAll('.input');
+                        var UserInput = [];
+                        input.forEach((element) => {
+                            UserInput.push(element.value);
+                            console.log(element.value);
+                        });
+
+                        var allCorrect = true;
+
+                        for (var i = 0; i < input.length; i++) {
+
+                            if (input[i].value.length != 1) {
+                                return alert('한자리만 입력해주세요');
+                            }
+                            else if (!/[a-zA-Z]/.test(input[i].value)) {
+                                return alert("영어 문자를 입력하세요.");
+                            }
+
+                            else if (CorrectAnswer[i] === UserInput[i]) {
+                                input[i].style.background = '#00FF2B';
+                            }
+                            else if (CorrectAnswer.includes(UserInput[i])) {
+                                input[i].style.background = '#FFFF66'
+                                allCorrect = false;
+                            }
+                            else {
+                                input[i].style.background = '';
+                                allCorrect = false;
+                            }
+                            input[i].classList.remove('input');
+                        }
+
+                        if (allCorrect) {
+                            alert('정답!')
+                            const Count = Number($Count.textContent);
+                            $Count.textContent = Count + 1;
+                            setTimeout(()=>{location.reload()},1000);
+            
+
+                        }
+
+                        else if (tryCount === 5) {
+                            alert('게임 종료!');
+                            $SubmitButton.disabled = true;
+                        }
+
+                        tryCount++;
+                        $Count.textContent = tryCount;
+
+                        const tryCountDisplay = document.createElement('span');
+                        const preTryCountDisplay = document.querySelector('#tryCountDisplay')
+
+                        if (preTryCountDisplay) {
+                            preTryCountDisplay.remove();
+                        }
+
+                        tryCountDisplay.id = 'tryCountDisplay';
+                        tryCountDisplay.textContent = `시도횟수: ${tryCount}`;
+                        $SubmitButton.parentNode.insertBefore(tryCountDisplay, $SubmitButton.nextSibling);
+                        
+                        if(tryCount != 6  && !allCorrect) {
+                        var template2 = `<center> <div>
+                            <input class="input" >
+                            <input class="input">
+                            <input class="input">
+                            <input class="input">
+                            <input class="input">
+                            </div> </center>`;
+                        document.querySelector('body').insertAdjacentHTML('beforeend', template2)
+                        }
+
+                        
+                    });
+            });
+
+
+       
+        $UserButton.addEventListener('click',
+            correct => {
+                deleteDiv();
+                console.log("사용자 지정 모드 선택!");
+
+
+                var template1 = ` <center> <div id = 'my_div'>
+                        <h1> Wordle Game <br> Answer Customizing</h1> <br><br><br>
+                        <input class="Answer">
+                        <input class="Answer">
+                        <input class="Answer">
+                        <input class="Answer">
+                        <input class="Answer"> <br><br>
+                        </div> </center>`;
+
+                document.querySelector('body').insertAdjacentHTML('beforeend', template1);
+                ResB.style.display = 'block'; 
+                AnsB.style.display = 'block'; 
+
+                var UserAnswer = document.querySelectorAll('.Answer');
+                var CorrectAnswer = ''; 
+
+                $AnswerButton.addEventListener('click', 
+                    correct => {
+                        for (i = 0; i < 5; i++) {
+                            CorrectAnswer += UserAnswer[i].value;
+                            if (UserAnswer[i].value.length != 1) {
+                                return alert('한자리만 입력해주세요');
+                            }
+                            else if (!/[a-zA-Z]/.test(UserAnswer[i].value)) {
+                                return alert("영어 문자를 입력하세요.");
+                            }
+                           
+                        }
+                        console.log(CorrectAnswer); 
+                        deleteDiv();
+                        CreateWordle(); 
+                        AnsB.style.display = 'none';
+                        SubB.style.display = 'block'; 
+                    });
+
+                $SubmitButton.addEventListener('click', 
+                    correct => {
+                        var input = document.querySelectorAll('.input');
+                        console.log('제출 버튼 클릭됨!');
+
+                        var input = document.querySelectorAll('.input');
+                        var UserInput = [];
+                        input.forEach((element) => {
+                            UserInput.push(element.value);
+                            console.log(element.value);
+                        });
+
+                        var allCorrect = true;
+
+
+                        for (var i = 0; i < UserInput.length; i++) {
+
+                            if (input[i].value.length != 1) {
+                                return alert('한자리만 입력해주세요');
+                            }
+                            else if (!/[a-zA-Z]/.test(input[i].value)) {
+                                return alert("영어 문자를 입력하세요.");
+                            }
+
+                            else if (CorrectAnswer[i] === UserInput[i]) {
+                                input[i].style.background = '#00FF2B';
+                            } else if (CorrectAnswer.includes(UserInput[i])) {
+                                input[i].style.background = '#FFFF66';
+                                allCorrect = false;
+                            }
+                            else {
+                                input[i].style.background = '';
+                                allCorrect = false;
+                            }
+                            input[i].classList.remove('input'); 
+                        }
+
+
+                        if (allCorrect) {
+                            alert('정답!')
+                            const Count = Number($Count.textContent);
+                            $Count.textContent = Count + 1;
+                           setTimeout(()=>{location.reload()},1000); 
+                        }
+                        else if (tryCount === 5) {
+                            alert('게임 종료!');
+                            $SubmitButton.disabled = true;
+                        }
+
+                        tryCount++;
+                        $Count.textContent = tryCount;
+
+                        const tryCountDisplay = document.createElement('span');
+                        const preTryCountDisplay = document.querySelector('#tryCountDisplay');
+
+                        if (preTryCountDisplay) {
+                            preTryCountDisplay.remove();
+                        }
+
+                        tryCountDisplay.id = 'tryCountDisplay';
+                        tryCountDisplay.textContent = `시도횟수: ${tryCount}`;
+                        $SubmitButton.parentNode.insertBefore(tryCountDisplay, $SubmitButton.nextSibling);
+
+                        
+                        if(tryCount != 6 && !allCorrect) {
+                        var template2 = `<center> <div>
+                            <input class="input">
+                            <input class="input">
+                            <input class="input">
+                            <input class="input">
+                            <input class="input">
+                            </div> </center>`;
+                        document.querySelector('body').insertAdjacentHTML('beforeend', template2);
+                        }
+                    })
+            });
+
+    </script>
+</body>
+
+</html>
